@@ -32,7 +32,11 @@ class MainHandler(tornado.web.RequestHandler):
 			"get_tech_blog_summary" : lambda : self.get_tech_blog_summary(),
 			"get_tech_blog" : lambda : self.get_tech_blog(),
 			"get_song_blog_num" : lambda : self.get_song_blog_num(),
-			"get_song_blog" : lambda : self.get_song_blog()
+			"get_song_blog" : lambda : self.get_song_blog(),
+			"get_album_num" : lambda : self.get_album_num(),
+			"get_album_summary" : lambda : self.get_album_summary(),
+			"get_album_picture_num" : lambda : self.get_album_picture_num(),
+			"get_album_picture" : lambda : self.get_album_picture()
 		}
 		if task_name != None:
 			result = tasks[task_name]()
@@ -105,6 +109,28 @@ class MainHandler(tornado.web.RequestHandler):
 		start = self.get_argument("start", 0)
 		tag = self.get_argument("tag", "全部")
 		return basic_info.get_song_blog(start, tag)
+
+	@jsonp
+	def get_album_num(self):
+		tag = self.get_argument("tag", "全部")
+		return basic_info.get_album_num(tag)
+
+	@jsonp
+	def get_album_summary(self):
+		tag = self.get_argument("tag", "全部")
+		start = self.get_argument("start", 0)
+		return basic_info.get_album_summary(int(start), tag)
+
+	@jsonp
+	def get_album_picture_num(self):
+		album = self.get_argument("album")
+		return basic_info.get_album_picture_num(album)
+
+	@jsonp
+	def get_album_picture(self):
+		album = self.get_argument("album")
+		start = self.get_argument("start", 0)
+		return basic_info.get_album_picture(int(start), album)
 
 application = tornado.web.Application([(r"/", MainHandler),], debug=True)
 

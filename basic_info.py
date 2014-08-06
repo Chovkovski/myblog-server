@@ -56,6 +56,17 @@ def get_song_blog_num(tag):
 		sql = "select count(*) from songs as s, tags as t where s.tag_id = t.id and t.tag_name = '%s'" % tag
 	return get_blog_num(sql)
 
+def get_album_num(tag):
+	if tag == "全部":
+		sql = "select count(*) from album"
+	else:
+		sql = "select count(*) from album as a, tags as t where a.tag_id = t.id and t.tag_name = '%s'" % tag
+	return get_blog_num(sql)
+
+def get_album_picture_num(album):
+	sql = "select count(*) from pictures as p, album as a where p.album_id = a. id and a.name = '%s'" % album
+	return get_blog_num(sql)
+
 def get_state(start, count = 5):
 	sql = "select * from state order by time desc limit %d, %d" % (start, count)
 	state = db.execute_sql(sql)
@@ -111,3 +122,28 @@ def get_song_blog(start, tag, count = 5):
 		result.append({ "title" : one_song[0], "src" : one_song[1], "date" : str(one_song[2]) })
 	return json.dumps(result, ensure_ascii = False)
 
+def get_album_summary(start, tag, count = 5):
+	if tag == "全部":
+		sql = "select * from album limit %d, %d" % (start, count)
+	else:
+		sql = "select a.* from album as a, tags as t where a.tag_id = t.id and t.tag_name = '%s' limit %d, %d" % (tag, start, count)
+	albums = db.execute_sql(sql)
+	result = []
+	for album in albums:
+		album_id = int(album[0])
+		album_name = album[2]
+		sql = "select src, time from pictures where album_id = %d order by time desc limit 3" % album_id
+		summary = db.execute_sql(sql)
+		pictures = []
+		for picture in summary:
+			pictures.append({ "src" : picture[0], "date" : str(picture[1]) })
+		result.append({ "album" : album_name, "summary" : pictures })
+	return json.dumps(result, ensure_ascii = False)
+
+def get_album_picture(start, album, count = 5):
+	sql = "select p.src, p.time from pictures as p, album as a where p.album_id = a.id and a.name = '%s' order by p.time desc limit %d, %d" % (album, start, count)
+	pictures = db.execute_sql(sql)
+	result = []
+	for picture in pictures:
+		result.append({ "src" : picture[0], "date" : str(picture[1]) })
+	return json.dumps(result, ensure_ascii = False)
