@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import json
-import sys
 
 import db
 
@@ -132,7 +131,7 @@ def get_album_summary(start, tag, count = 5):
 	for album in albums:
 		album_id = int(album[0])
 		album_name = album[2]
-		sql = "select src, time from pictures where album_id = %d order by time desc limit 3" % album_id
+		sql = "select src, time from pictures where album_id = %d order by id desc limit 3" % album_id
 		summary = db.execute_sql(sql)
 		pictures = []
 		for picture in summary:
@@ -141,7 +140,7 @@ def get_album_summary(start, tag, count = 5):
 	return json.dumps(result, ensure_ascii = False)
 
 def get_album_picture(start, album, count = 5):
-	sql = "select p.src, p.time from pictures as p, album as a where p.album_id = a.id and a.name = '%s' order by p.time desc limit %d, %d" % (album, start, count)
+	sql = "select p.src, p.time from pictures as p, album as a where p.album_id = a.id and a.name = '%s' order by p.id desc limit %d, %d" % (album, start, count)
 	pictures = db.execute_sql(sql)
 	result = []
 	for picture in pictures:

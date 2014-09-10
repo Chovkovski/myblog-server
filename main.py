@@ -5,16 +5,9 @@ import tornado.ioloop
 import tornado.web
 
 import basic_info
+import upload
 
-def jsonp(func):
-	def wrapper(self):
-		jsonp = self.get_argument("callback", "")
-		if jsonp != "":
-			result = jsonp + "(" + func(self) + ")"
-		else:
-			result = func(self)
-		return result
-	return wrapper
+from common import jsonp
 
 class MainHandler(tornado.web.RequestHandler):
 	
@@ -132,7 +125,49 @@ class MainHandler(tornado.web.RequestHandler):
 		start = self.get_argument("start", 0)
 		return basic_info.get_album_picture(int(start), album)
 
-application = tornado.web.Application([(r"/", MainHandler),], debug=True)
+class UploadHandler(tornado.web.RequestHandler):
+
+	def post(self):
+		task_name = self.get_argument("task_name", None)
+		tasks = {
+			"upload_story" : lambda : self.upload_story(),
+			"upload_tech" : lambda : self.upload_tech(),
+			"upload_songs" : lambda : self.upload_songs(),
+			"upload_pictures" : lambda : self.upload_pictures()
+		}
+		if task_name != None:
+			result = tasks[task_name]()
+		else:
+			result = "invalid task_name"
+		self.write(result)
+
+	@jsonp
+	def upload_story(self):
+		tag_id = self.get_argument("tag_id")
+		title = self.get_argument("title")
+		summary = self.get_argument("summary")
+		content = self.get_argument("content")
+		date = self.get_argument("date")
+		return upload.upload_story(tag_id, title, summary, content, date)
+
+	@jsonp
+	def upload_tech(self):
+		tag_id = self.get_argument("tag_id")
+		title = self.get_argument("title")
+		summary = self.get_argument("summary")
+		content = self.get_argument("content")
+		date = self.get_argument("date")
+		return upload.upload_tech(tag_id, title, summary, content, date)
+
+	@jsonp
+	def upload_songs(self):
+		pass
+
+	@jsonp
+	def upload_pictures(self):
+		pass
+
+application = tornado.web.Application([(r"/", MainHandler), (r"/upload", UploadHandler)], debug=True)
 
 if __name__ == "__main__":
 	reload(sys)
